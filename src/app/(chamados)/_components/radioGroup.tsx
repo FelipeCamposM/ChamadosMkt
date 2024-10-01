@@ -1,9 +1,11 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useController } from "react-hook-form";
 
+// Tipagem para as opções do RadioGroup
 interface RadioGroupProps {
   options: { value: string; label: string }[];
-  field: any; // Aqui você pode tipar melhor de acordo com sua lib de formulários
+  field: ReturnType<typeof useController>['field']; // Corrigindo a tipagem do field
   label: string;
   text: string;
 }

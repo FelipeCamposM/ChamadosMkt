@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button"
 import { Pencil } from 'lucide-react';
-import { ScrollArea } from "@/components/ui/scroll-area"
+// import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 

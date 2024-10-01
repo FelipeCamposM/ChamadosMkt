@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -13,31 +13,31 @@ import { useParams, useRouter } from "next/navigation";
 
 // Schema de validação atualizado com os novos campos
 const FormSchema = z.object({
-  type: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  type: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar alguma opção.",
   }),
-  complexidade: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  complexidade: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar uma complexidade.",
   }),
-  areasEnvolvidas: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  areasEnvolvidas: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar a quantidade de áreas envolvidas.",
   }),
-  financeiroImediato: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  financeiroImediato: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar o impacto financeiro imediato.",
   }),
-  dadosEstudos: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  dadosEstudos: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar a necessidade de dados e estudos.",
   }),
-  escalabilidade: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  escalabilidade: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar o nível de escalabilidade.",
   }),
-  implantacaoEquipe: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  implantacaoEquipe: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar o tempo de implantação.",
   }),
-  importanciaLongoPrazo: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  importanciaLongoPrazo: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar o nível de importância no longo prazo.",
   }),
-  satisfacaoCliente: z.enum(["low", "md-low", "normal", "md-high", "high"], {
+  satisfacaoCliente: z.enum(["1", "2", "3", "4", "5"], {
     required_error: "Você precisa selecionar o impacto na satisfação do cliente.",
   }),
   deadline: z.string().refine((value) => {
@@ -73,17 +73,17 @@ export default function RadioGroupForm() {
     setMaxDate(maxFormattedDate);
   }, []);
 
-  const form = useForm<z.infer<typeof FormSchema>>({
+  const form = useForm<FormSchema>({
     resolver: zodResolver(FormSchema),
   });
 
   function calculateTotalScore(data: Record<string, string>) {
-    const scores: { [key: string]: number } = {
-      low: 5,
-      "md-low": 4,
-      normal: 3,
-      "md-high": 2,
-      high: 1,
+    const scores: { [key: string]: number } = { 
+      "1": 1, 
+      "2": 2, 
+      "3": 3, 
+      "4": 4, 
+      "5": 5 
     };
   
     // Itera sobre os dados do formulário e soma os pontos das escolhas
@@ -135,11 +135,11 @@ export default function RadioGroupForm() {
   }
 
   const radioOptions = [
-    { value: "low", label: "Baixa" },
-    { value: "md-low", label: "Pouco Baixa" },
-    { value: "normal", label: "Normal" },
-    { value: "md-high", label: "Pouco Alta" },
-    { value: "high", label: "Alta" },
+    { value: "1", label: "Baixa" },
+    { value: "2", label: "Pouco Baixa" },
+    { value: "3", label: "Normal" },
+    { value: "4", label: "Pouco Alta" },
+    { value: "5", label: "Alta" },
   ];
 
   return (
@@ -151,11 +151,17 @@ export default function RadioGroupForm() {
           </CardHeader>
           <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("type")}
-                label="Tempo de Execução"
-                text="Baixo: +3 meses ~ Normal: menos de 3 meses ~ Alto: menos de 1 semana."
+            <Controller
+                name="type"
+                control={form.control}
+                render={({ field }) => (
+                <CustomRadioGroup
+                  options={radioOptions}
+                  field={field}
+                  label="Tempo de Execução"
+                  text="Baixo: +3 meses ~ Normal: menos de 3 meses ~ Alto: menos de 1 semana."
+                />
+                )}
               />
               <CustomRadioGroup
                 options={radioOptions}
