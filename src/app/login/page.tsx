@@ -1,22 +1,23 @@
-'use client';
+'use client'
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
- 
- 
+import Link from "next/link";
+import React from "react";
+
 const formSchema = z.object({
-    nome: z.string().min(1, { message: "Nome obrigatório" }),
-    assunto: z.string().min(1, { message: "Assunto obrigatório" }),
-    descricao: z.string().min(1, { message: "Descrição obrigatória" }),
+    email: z.string().min(1, { message: "Email obrigatório" }),
+    senha: z.string().min(1, { message: "Senha obrigatória" }),
 })
- 
-export default function FormContent() {
+
+
+export default function Login(){
+
     const [token, setToken] = useState('');
  
     useEffect(() => {
@@ -51,9 +52,8 @@ export default function FormContent() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            nome: "",
-            assunto: "",
-            descricao: "",
+            email: "",
+            senha: "",
         },
     })
  
@@ -68,9 +68,8 @@ export default function FormContent() {
             },
             body: JSON.stringify({
                 input: {
-                    nome: data.nome,
-                    assunto: data.assunto,
-                    descricao: data.descricao,
+                    email: data.email,
+                    senha: data.senha,
                 }
             })
         });
@@ -79,23 +78,27 @@ export default function FormContent() {
             throw new Error('Network response was not ok');
         }
     }
- 
+
     return (
+        <>
         <div className="flex items-center justify-center mt-16">
             <Card className="w-[600px] flex flex-col items-center">
-                <CardHeader className="text-2xl font-bold">Abrir um Chamado</CardHeader>
+                <CardHeader>
+                    <CardTitle className="text-2xl font-bold">Login</CardTitle>
+                </CardHeader>
                 <CardContent className="w-full">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2
                         flex flex-col items-center">
+                            
                             <FormField
                                 control={form.control}
-                                name="nome"
+                                name="email"
                                 render={({ field }) => (
                                     <FormItem className="w-full p-2">
-                                        <FormLabel>Nome:</FormLabel>
+                                        <FormLabel>Email:</FormLabel>
                                         <FormControl>
-                                            <Input type="Descrição" {...field}
+                                            <Input type="email" {...field}
                                                 className="w-full"
                                             />
                                         </FormControl>
@@ -105,12 +108,12 @@ export default function FormContent() {
                             />
                             <FormField
                                 control={form.control}
-                                name="assunto"
+                                name="senha"
                                 render={({ field }) => (
                                     <FormItem className="w-full p-2">
-                                        <FormLabel>Assunto do Chamado:</FormLabel>
+                                        <FormLabel>Senha</FormLabel>
                                         <FormControl>
-                                            <Input type="Descrição" {...field}
+                                            <Input type="password" {...field}
                                                 className="w-full"
                                             />
                                         </FormControl>
@@ -118,26 +121,18 @@ export default function FormContent() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="descricao"
-                                render={({ field }) => (
-                                    <FormItem className="w-full p-2">
-                                        <FormLabel>Descrição:</FormLabel>
-                                        <FormControl>
-                                            <Textarea {...field}
-                                                className="w-full text-black"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <Button type="submit">Enviar</Button>
+                            
+                            <div className="flex space-x-4">
+                                <Button type="submit">Entrar</Button>
+                                <Link href={"/register"}>                                
+                                    <Button type="button">Registre-se</Button>
+                                </Link>
+                            </div>
                         </form>
                     </Form>
                 </CardContent>
             </Card>
         </div>
+        </>
     )
-}
+} 
