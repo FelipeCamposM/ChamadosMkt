@@ -1,4 +1,6 @@
 'use client';
+
+import "../../../app/globals.css";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +18,7 @@ const formSchema = z.object({
     descricao: z.string().min(1, { message: "Descrição obrigatória" }),
 });
 
-export default function FormContent() {
+export default function OpenTicket() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -55,7 +57,7 @@ export default function FormContent() {
     }
 
     return (
-        <div className="flex items-center justify-center mt-8">
+        <div className="flex items-center justify-center mt-[7%]">
             <Card className="w-[600px] flex flex-col items-center">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold">Abrir um novo chamado</CardTitle>
@@ -103,7 +105,7 @@ export default function FormContent() {
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit">Enviar</Button>
+                                <Button type="submit" className="bg-blue-800 hover:bg-blue-700">Enviar</Button>
                             </form>
                         </div>
                     </Form>

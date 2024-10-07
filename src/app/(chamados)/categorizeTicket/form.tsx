@@ -2,58 +2,56 @@
 
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle, CardContent, CardHeader } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import CustomRadioGroup from "@/app/(chamados)/_components/radioGroup"; // Importando o componente reutilizável
 import { useParams, useRouter } from "next/navigation";
+import { Card, CardTitle, CardHeader } from "@/components/ui/card";
+// import router from "next/router";
 
-// Schema de validação atualizado com os novos campos
-const FormSchema = z.object({
-  type: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar alguma opção.",
-  }),
-  complexidade: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar uma complexidade.",
-  }),
-  areasEnvolvidas: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar a quantidade de áreas envolvidas.",
-  }),
-  financeiroImediato: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar o impacto financeiro imediato.",
-  }),
-  dadosEstudos: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar a necessidade de dados e estudos.",
-  }),
-  escalabilidade: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar o nível de escalabilidade.",
-  }),
-  implantacaoEquipe: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar o tempo de implantação.",
-  }),
-  importanciaLongoPrazo: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar o nível de importância no longo prazo.",
-  }),
-  satisfacaoCliente: z.enum(["1", "2", "3", "4", "5"], {
-    required_error: "Você precisa selecionar o impacto na satisfação do cliente.",
-  }),
-  deadline: z.string().refine((value) => {
-    const date = new Date(value);
-    return !isNaN(date.getTime()); // Verifica se é uma data válida
-  }, { message: "Data inválida" }),
-});
+const formSchema = z.object({
+    execTime: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar um tempo de execução.",
+    }),
+    complexity: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar uma complexidade.",
+    }),
+    envolvedAreas: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar uma quantidade de envolvidos.",
+    }),
+    financeReturn: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar um retorno financeiro imediato.",
+    }),
+    dataStudy: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar um quantidade de estudos necessários.",
+    }),
+    scalability: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar uma complexidade.",
+    }),
+    implatationEquip: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar uma complexidade.",
+    }),
+    longImportance: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar uma complexidade.",
+    }),
+    satisfactionClient: z.enum(["1", "2", "3", "4", "5"], {
+        required_error: "Você precisa selecionar uma complexidade.",
+    }),
+    deadline: z.string().refine((value) => {
+        const date = new Date(value);
+        return !isNaN(date.getTime()); // Verifica se é uma data válida
+        }, { message: "Data inválida" }),
+})
 
+export default function FormContent() {
+    const [minDate, setMinDate] = useState("");
+    const [maxDate, setMaxDate] = useState("");
+    const { id } = useParams();
+    // const router = useRouter();
 
-export default function RadioGroupForm() {
-  const [minDate, setMinDate] = useState("");
-  const [maxDate, setMaxDate] = useState("");
-  const { id } = useParams();
-  const router = useRouter();
-
-  useEffect(() => {
+useEffect(() => {
     // Define a data mínima como hoje no formato "YYYY-MM-DDTHH:MM"
     const today = new Date();
     const year = today.getFullYear();
@@ -71,166 +69,563 @@ export default function RadioGroupForm() {
     const maxDay = "31";
     const maxFormattedDate = `${maxYear}-${maxMonth}-${maxDay}T23:59`; // Último minuto de 2050
     setMaxDate(maxFormattedDate);
-  }, []);
+    }, []);
 
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(FormSchema),
-  });
-
-  function calculateTotalScore(data: Record<string, string>) {
-    const scores: { [key: string]: number } = { 
-      "1": 1, 
-      "2": 2, 
-      "3": 3, 
-      "4": 4, 
-      "5": 5 
-    };
-  
-    // Itera sobre os dados do formulário e soma os pontos das escolhas
-    const totalScore = Object.keys(data).reduce((acc, key) => {
-      if (key !== "deadline" && scores[data[key]]) { // Ignora o campo deadline e checa se a chave existe em scores
-        acc += scores[data[key]];
-      }
-      return acc;
-    }, 0);
-  
-    return totalScore;
-  }
-  
-
-    
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const totalScore = calculateTotalScore(data);
-
-    try {
-      const response = await fetch(`/api/chamados/categorize/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            deadline: "",
         },
-        body: JSON.stringify({
-          ...data,
-          totalScore, // Inclui a pontuação total
-        }),
-      });
+    })
 
-      if (!response.ok) {
-        throw new Error('Erro ao categorizar o chamado.');
-      }
+    const router = useRouter();
 
-      toast({
-        title: "Chamado categorizado com sucesso!",
-        description: `A soma total é ${totalScore}`,
-      });
+    async function onSubmit(data: z.infer<typeof formSchema>) {
+        console.log(data)
+        try {
+            const formData = new FormData();
 
-      // Redireciona para a página de lista após o sucesso
-      router.push("/listopenTickets");
-    } catch (error) {
-      console.error('Erro ao categorizar o chamado:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao categorizar o chamado.",
-      });
+            formData.append('execTime', data.execTime);
+            formData.append('complexity', data.complexity);
+            formData.append('envolvedAreas', data.envolvedAreas);
+            formData.append('financeReturn', data.financeReturn);
+            formData.append('dataStudy', data.dataStudy);
+            formData.append('scalability', data.scalability);
+            formData.append('implatationEquip', data.implatationEquip);
+            formData.append('longImportance', data.longImportance);
+            formData.append('satisfactionClient', data.satisfactionClient);
+            formData.append('deadline', data.deadline);
+
+            const totalScore = Number(data.execTime) + Number(data.complexity) + Number(data.envolvedAreas) + Number(data.financeReturn) + Number(data.dataStudy) + Number(data.scalability) + Number(data.implatationEquip) + Number(data.longImportance) + Number(data.satisfactionClient);
+            formData.append('totalScore', totalScore.toString());
+
+            const response = await fetch('/api/chamados/categorize/' + id + '', {
+                method: 'POST',
+                body: formData, // Enviando os dados via FormData
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao criar o chamado.');
+            }
+
+            const result = await response.json();
+            console.log('Chamado criado com sucesso:', result);
+
+            // Redireciona após sucesso
+            router.push('/listCategorizedTickets');
+        } catch (error) {
+            console.error('Erro ao criar o chamado:', error);
+        }
     }
-  }
-
-  const radioOptions = [
-    { value: "1", label: "Baixa" },
-    { value: "2", label: "Pouco Baixa" },
-    { value: "3", label: "Normal" },
-    { value: "4", label: "Pouco Alta" },
-    { value: "5", label: "Alta" },
-  ];
-
-  return (
-    <Form {...form}>
-      <div className="flex items-center justify-center">
-        <Card className="w-2/3">
-          <CardHeader>
-            <CardTitle>Classifique seu Chamado</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
-            <Controller
-                name="type"
-                control={form.control}
-                render={({ field }) => (
-                <CustomRadioGroup
-                  options={radioOptions}
-                  field={field}
-                  label="Tempo de Execução"
-                  text="Baixo: +3 meses ~ Normal: menos de 3 meses ~ Alto: menos de 1 semana."
-                />
-                )}
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("complexidade")}
-                label="Nível de Complexidade"
-                text="Baixo: Simples e direto ~ Alto: Muito complexo."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("areasEnvolvidas")}
-                label="Quantidade de Áreas Envolvidas"
-                text="Baixo: Apenas uma área ou equipe ~ Alto: Muitas áreas (3+ áreas)."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("financeiroImediato")}
-                label="Resultado Financeiro Imediato"
-                text="Baixo: Sem impacto imediato ~ Alto: Aumento direto na receita."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("dadosEstudos")}
-                label="Necessidade de Dados e Estudos"
-                text="Baixo: Requer pesquisa profunda ~ Alto: Não requer dados adicionais."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("escalabilidade")}
-                label="Nível de Escalabilidade"
-                text="Baixo: Difícil de escalar ~ Alto: Altamente escalável."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("implantacaoEquipe")}
-                label="Tempo de Implantação Junto à Equipe"
-                text="Baixo: Treinamento extenso ~ Alto: Implantação rápida."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("importanciaLongoPrazo")}
-                label="Nível de Importância no Longo Prazo"
-                text="Baixo: Impacto de curto prazo ~ Alto: Impacto estratégico longo."
-              />
-              <CustomRadioGroup
-                options={radioOptions}
-                field={form.register("satisfacaoCliente")}
-                label="Impacto na Satisfação do Cliente"
-                text="Baixo: Sem impacto significativo ~ Alto: Melhora significativa."
-              />
-              <FormItem>
-                <FormLabel className="text-xl font-semibold pr-4">Data Limite:</FormLabel>
-                <FormControl>
-                  <input
-                    type="date"
-                    {...form.register("deadline")}
-                    className="border rounded-md p-2"
-                    min={minDate}
-                    max={maxDate}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-              <div className="flex justify-center pt-4">
-                <Button type="submit">Enviar</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </Form>
-  );
+ 
+    return (
+        <div>
+            <Form {...form}>
+                <div className="flex items-center justify-center">
+                <Card className="w-[600px] flex justify-center items-center flex-col">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold">Categorizar Chamado</CardTitle>
+                    </CardHeader>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2
+                flex flex-col gap-4 mb-4">
+                    <FormField
+                        control={form.control}
+                        name="execTime"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Tempo de Execução</FormLabel>
+                                <FormDescription>
+                                Baixo: +3 meses ~ Normal: menos de 3 meses ~ Alto: menos de 1 semana.
+                                </FormDescription>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="complexity"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Nível de Complexidade</FormLabel>
+                                <FormDescription>
+                                Baixo: Simples e direto ~ Alto: Muito complexo.
+                                </FormDescription>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="envolvedAreas"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Quantidade de Áreas Envolvidas</FormLabel>
+                                <FormDescription>
+                                Baixo: Apenas uma área ou equipe ~ Alto: Muitas áreas (3+ áreas).
+                                </FormDescription>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="financeReturn"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Resultado Financeiro Imediato</FormLabel>
+                                <FormDescription>
+                                Baixo: Sem impacto imediato ~ Alto: Aumento direto na receita.
+                                </FormDescription>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="dataStudy"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Necessidade de Dados e Estudos</FormLabel>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="scalability"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Nível de Escalabilidade</FormLabel>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="implatationEquip"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Tempo de implantação Junto à Equipe</FormLabel>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="longImportance"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Nível de Importância no Longo Prazo</FormLabel>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="satisfactionClient"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Impacto na Satisfação do Cliente</FormLabel>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Pouco Baixa
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="3" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Normal</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="4" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Pouco Alta</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="5" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Alta</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                            <FormItem>
+                                <FormLabel className="text-xl font-semibold pr-4">Data Limite:</FormLabel>
+                                <FormControl>
+                                <input
+                                    type="date"
+                                    {...form.register("deadline")}
+                                    className="border rounded-md p-2"
+                                    min={minDate}
+                                    max={maxDate}
+                                />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                    <Button type="submit">Enviar</Button>
+                </form>
+                </Card>
+                </div>
+            </Form>
+        </div>
+    )
 }

@@ -29,6 +29,12 @@ import {
   } from "@/components/ui/dialog"
 
 
+interface Chamado {
+    id: number;
+    name: string;
+    subtitle: string;
+    description: string;
+}
 
 
 export default function OpenTickets(){
@@ -43,7 +49,7 @@ export default function OpenTickets(){
     useEffect(() => {
         const fetchChamados = async () => {
             try {
-                const response = await fetch('/api/chamados', {
+                const response = await fetch('/api/chamados/open', {
                     method: 'GET',
                 });
                 if (!response.ok) {
@@ -76,9 +82,9 @@ export default function OpenTickets(){
                         </TableHeader>
                         <TableBody>
                             {chamados.length > 0 ? (
-                                chamados.map((chamado) => (
+                                chamados.map((chamado: Chamado) => (
                                     <Dialog key={chamado.id}>
-                                          <DialogTrigger className="hover:cursor-pointer" asChild>
+                                        <DialogTrigger className="hover:cursor-pointer" asChild>
                                             <TableRow key={chamado.id}>
                                                 <TableCell className="pl-8">{chamado.name}</TableCell>
                                                 <TableCell>{chamado.subtitle}</TableCell>

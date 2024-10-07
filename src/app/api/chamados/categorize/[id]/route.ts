@@ -11,11 +11,18 @@ interface Chamado {
   description: string;
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request , { params }: { params: { id: string } }) {
   try {
-    const body = await request.json();
-    const { deadline, priority } = body; // Recebe o 'deadline' e a 'priority' do corpo da requisição
-    const { id } = params; // ID do chamado
+    const body = await request.formData();
+    const priority = body.get('totalScore') as string;
+    const deadline = body.get('deadline') as string;
+    const id = Number(params.id); // Converter o id para número
+
+    // Converte o priority de string para número
+    // priority = Number(priority);
+
+    // Converte o deadline para um objeto Date
+    const deadlineDate = new Date(deadline);
 
     // Buscar o chamado original pelo ID
     const chamado: Chamado[] = await prisma.$queryRaw<Chamado[]>`
@@ -30,10 +37,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const chamadoData = chamado[0]; // Acessar o primeiro resultado da array
     const { name, subtitle, description } = chamadoData; // Extrair os campos
 
-    // Inserir o chamado na tabela 'chamado_caracterizado'
+    // Inserir o chamado na tabela 'chamado_caracterizado' convertendo deadline para timestamp
     await prisma.$executeRaw`
-      INSERT INTO "chamado_caracterizado" (name, subtitle, description, deadline, priority)
-      VALUES (${name}, ${subtitle}, ${description}, ${deadline}, ${priority});
+      INSERT INTO "Chamado_Caracterizado" (name, subtitle, description, deadline, priority)
+      VALUES (${name}, ${subtitle}, ${description}, ${deadlineDate}, ${priority});
     `;
 
     // Remover o chamado da tabela original 'Chamado'

@@ -16,7 +16,7 @@ datasource db {
 model User {
   id       Int @id @default(autoincrement())
   name     String
-  email    String
+  email    String @unique
   senha    String
   createAt DateTime @default(now()) 
 }
@@ -37,4 +37,13 @@ model Chamado_Caracterizado {
   createAt    DateTime @default(now()) 
   deadline    DateTime
   priority    String
+}
+
+model Chamado_Concluido {
+  id          Int @id @default(autoincrement())
+  name        String
+  subtitle    String
+  description String
+  createAt    DateTime
+  finishedAt  DateTime @default(now()) 
 }
