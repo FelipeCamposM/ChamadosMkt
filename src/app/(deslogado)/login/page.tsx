@@ -10,9 +10,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import React from "react";
 import { useRouter } from 'next/navigation';
-import { useEffect } from "react";
-import { auth } from "../../../../auth";
-
+import login from "../../(auth)/login/_actions/login";
 
 const formSchema = z.object({
     email: z.string().min(1, { message: "Email obrigatório" }),
@@ -20,8 +18,7 @@ const formSchema = z.object({
 })
 
 
-export default function Login(){
-    const router = useRouter();
+export default function Login() {
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -30,51 +27,27 @@ export default function Login(){
             senha: "",
         },
     })
- 
-    async function onSubmit(data: z.infer<typeof formSchema>) {
-        console.log(data)
+    
+    const router = useRouter();
+    
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
         try {
             const formData = new FormData();
             formData.append('email', data.email);
             formData.append('senha', data.senha);
-            
-            const id = formData.get('id') as string;
-            formData.append('id', id);
 
+            const result = await login(formData);  // Supondo que `login` seja uma função que trate o login
 
-
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao realizar login.');
+            if (result) {
+                router.push('/listopenTickets');
             }
 
-            const result = await response.json();
-            console.log('Login realizado com sucesso:', result);
-
-            // Redireciona após sucesso
-            router.push('/listopenTickets');
         } catch (error) {
             console.error('Erro ao realizar login:', error);
         }
     }
 
-    // useEffect(() => {
-    //     const checkSession = async () => {
-    //         const session = await auth();
-    //         if (session) {
-    //             router.push('/listopenTickets'); // Redireciona se já estiver logado
-    //         }
-    //     };
-    //     checkSession();
-    // }, [router]);
-    
-
     return (
-        <>
         <div className="flex items-center justify-center mt-[7%]">
             <Card className="w-[600px] flex flex-col items-center">
                 <CardHeader>
@@ -82,9 +55,7 @@ export default function Login(){
                 </CardHeader>
                 <CardContent className="w-full">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2
-                        flex flex-col items-center">
-                            
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 flex flex-col items-center">
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -92,9 +63,7 @@ export default function Login(){
                                     <FormItem className="w-full p-2">
                                         <FormLabel>Email:</FormLabel>
                                         <FormControl>
-                                            <Input type="email" {...field}
-                                                className="w-full"
-                                            />
+                                            <Input type="email" {...field} className="w-full" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -107,9 +76,7 @@ export default function Login(){
                                     <FormItem className="w-full p-2">
                                         <FormLabel>Senha</FormLabel>
                                         <FormControl>
-                                            <Input type="password" {...field}
-                                                className="w-full"
-                                            />
+                                            <Input type="password" {...field} className="w-full" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -127,6 +94,5 @@ export default function Login(){
                 </CardContent>
             </Card>
         </div>
-        </>
     )
-} 
+}

@@ -2,27 +2,29 @@
 
 import { signIn } from '../../../../../auth';
 import { AuthError } from 'next-auth';
-import { redirect } from 'next/navigation';
 
-export default async function login(formData: FormData) {
+export default async function login(formData: FormData): Promise<boolean> {
   const entries = Array.from(formData.entries());
-  const { email, password } = Object.fromEntries(entries) as {
+  const { email, senha } = Object.fromEntries(entries) as {
     email: string;
-    password: string;
+    senha: string;
   };
-
+  
   try {
     await signIn('credentials', {
       email,
-      password,
+      senha,
+      redirect: false,  // Evita o redirecionamento automático
     });
+
+    return true;  // Login bem-sucedido
+
   } catch (e) {
-    if (e instanceof AuthError) {
-      if (e.type === 'CredentialsSignin') {
-        throw new Error('Credenciais inválidas');
-      }
+    if (e instanceof AuthError && e.type === 'CredentialsSignin') {
+      throw new Error('Credenciais inválidas');
+    } else {
+      console.error('Erro durante o login:', e);
+      throw new Error('Erro ao tentar realizar login no servidor');
     }
   }
-
-  redirect('/listopenTickets');
 }

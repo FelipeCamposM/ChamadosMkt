@@ -1,14 +1,12 @@
 'use client'
 
-import * as React from "react"
+import * as React from "react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Home, Settings, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import auth from "../../../../auth";
-
 
 interface HeaderProps {
     children?: React.ReactNode;
@@ -18,31 +16,10 @@ export default function Header({ children }: HeaderProps) {
     const [user, setUser] = useState<{ name: string } | null>(null);
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await fetch("/api/chamado", {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ id: '1' }) // Substitua pelo ID correto do usuário
-                });
-
-                console.log('Resposta da API:', response); // Log da resposta da API
-
-                if (!response.ok) {
-                    throw new Error("Erro ao buscar o usuário.");
-                }
-
-                const data = await response.json();
-                console.log('Dados do usuário:', data); // Log dos dados retornados
-                setUser(data.user); // Atualiza o estado com os dados do usuário
-            } catch (error) {
-                console.error("Erro ao buscar o usuário:", error);
-            }
-        };
-
-        fetchUser();
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser)); // Recupera o usuário do localStorage
+        }
     }, []);
 
     return (
@@ -93,5 +70,5 @@ export default function Header({ children }: HeaderProps) {
             </div>
             {children}
         </div>
-    )
+    );
 }

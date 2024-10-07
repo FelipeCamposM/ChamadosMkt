@@ -3,6 +3,20 @@ import Credentials from 'next-auth/providers/credentials';
 import db from '@/lib/db';
 import { compareSync } from 'bcrypt-ts';
 
+interface JWT {
+    productToken?: string;
+}
+
+declare module 'next-auth' {
+    interface Session {
+        productToken?: string;
+    }
+
+    interface User {
+        productToken?: string;
+    }
+}
+
 // Definição da função NextAuth
 export const {
     handlers: { GET, POST },
@@ -44,22 +58,20 @@ export const {
                 if (checkPassword) {
                     // Retornar o usuário se a senha for válida
                     return { id: user.id.toString(), name: user.name, email: user.email };
-                }
+                } 
 
-                throw new Error('E-mail ou senha inválidos');
+                throw new Error('senha inválidos');
             }
         })
     ],
     pages: {
         signIn: '/login', // A página de login personalizada
         error: '/auth/error', // Página de erro personalizada
+        
     },
     callbacks: {
         // Redireciona após login
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async redirect({ url, baseUrl }) {
-            return '/listopenTickets'; // Redireciona para a rota específica após o login
-        },
         async session({ session, user }) {
             // Adiciona informações do usuário à sessão
             session.user = user;
