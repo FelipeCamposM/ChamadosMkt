@@ -7,19 +7,26 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { getSession } from 'next-auth/react';
+import logout from '@/app/(auth)/_actions/logout';
+// import { User } from "@prisma/client";
 
 interface HeaderProps {
     children?: React.ReactNode;
 }
 
 export default function Header({ children }: HeaderProps) {
-    const [user, setUser] = useState<{ name: string } | null>(null);
+
+    const [user, setUser] = useState< { name: string } | null>(null);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser)); // Recupera o usuário do localStorage
-        }
+        const fetchUser = async () => {
+            const session = await getSession(); // Obtém a sessão
+            if (session && session.user) {
+                setUser(session.user); // Define o usuário no estado
+            }
+        };
+        fetchUser();
     }, []);
 
     return (
@@ -61,8 +68,10 @@ export default function Header({ children }: HeaderProps) {
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Log out</span>
+                                <form action={logout} className="w-full">
+                                    
+                                    <Button className="w-full"><LogOut className="mr-2 h-4 w-4" /> Sair</Button>
+                                </form>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

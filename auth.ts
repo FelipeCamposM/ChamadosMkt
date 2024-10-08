@@ -3,19 +3,31 @@ import Credentials from 'next-auth/providers/credentials';
 import db from '@/lib/db';
 import { compareSync } from 'bcrypt-ts';
 
+
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface JWT {
+    id?: string;
+    name?: string;
+    email?: string;
     productToken?: string;
 }
 
 declare module 'next-auth' {
     interface Session {
+        user: {
+            id: string;
+            name: string;
+            email: string;
+            emailVerified?: Date | null;
+        };
         productToken?: string;
     }
 
     interface User {
         productToken?: string;
-    }
-}
+        emailVerified?: Date | null;
+    }}
 
 // Definição da função NextAuth
 export const {
@@ -47,6 +59,8 @@ export const {
 
                 console.log('Usuário encontrado:', user);
 
+
+
                 if (!user) {
                     throw new Error('E-mail ou senha inválidos');
                 }
@@ -72,9 +86,16 @@ export const {
     callbacks: {
         // Redireciona após login
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        async session({ session, user }) {
-            // Adiciona informações do usuário à sessão
-            session.user = user;
+        async session({ session, token }) {
+            // Adiciona as informações do usuário na sessão
+            if (token) {
+                session.user = {
+                    id: token.id as string,
+                    name: token.name as string,
+                    email: token.email as string,
+                    emailVerified: token.emailVerified as Date | null
+                };
+            }
             return session;
         },
         async jwt({ token, user }) {
@@ -86,7 +107,8 @@ export const {
             }
             return token;
         }
-    }
+    },
+    secret: process.env.NEXTAUTH_SECRET,
 });
 
 // Exportando as funções GET e POST
