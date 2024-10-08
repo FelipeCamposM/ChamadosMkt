@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuGroup, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Home, Settings, LogOut } from "lucide-react";
+import { Home, Settings, LogOut, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -49,17 +49,20 @@ export default function Header({ children }: HeaderProps) {
                     </Link>
                     <DropdownMenu>
                         <DropdownMenuTrigger className="custom-class text-white text-xl bg-blue-800 hover:bg-blue-700 hover:text-white border-none" asChild>
-                            <Button variant="outline">Perfil</Button>
+                            <Button variant="outline"><Menu className="h-6 w-6" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56">
                             <DropdownMenuLabel>
-                                <p>Minha Conta: {user ? user.name : "Carregando..."}</p>
+                                <p>Minha Conta: </p>
+                                <p>{user ? user.name : "Carregando..."}</p>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
                                 <DropdownMenuItem>
-                                    <Home className="mr-2 h-4 w-4" />
-                                    <span>Início</span>
+                                    <Link href="/" className="flex">
+                                        <Home className="mr-2 h-4 w-4" />
+                                        <span>Abrir Chamado</span>
+                                    </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
                                     <Settings className="mr-2 h-4 w-4" />

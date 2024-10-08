@@ -34,7 +34,8 @@ model Chamado_Caracterizado {
   name        String
   subtitle    String
   description String
-  createAt    DateTime @default(now()) 
+  encharged   String 
+  createAt    DateTime @default(now())
   deadline    DateTime
   priority    String
 }
@@ -44,6 +45,7 @@ model Chamado_Concluido {
   name        String
   subtitle    String
   description String
+  encharged   String
   createAt    DateTime
   finishedAt  DateTime @default(now()) 
 }

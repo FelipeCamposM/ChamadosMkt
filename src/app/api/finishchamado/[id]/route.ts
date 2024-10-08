@@ -8,6 +8,7 @@ interface Chamado_Caracterizado {
   subtitle: string;
   description: string;
   createAt: Date;
+  encharged: string;
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   try {
     // Buscar o chamado da tabela "Chamado_Caracterizado"
     const chamado: Chamado_Caracterizado[] = await prisma.$queryRaw<Chamado_Caracterizado[]>`
-      SELECT name, subtitle, description, "createAt" FROM "Chamado_Caracterizado" WHERE id = ${id};
+      SELECT name, subtitle, description, "createAt", encharged FROM "Chamado_Caracterizado" WHERE id = ${id};
     `;
 
     if (chamado.length === 0) {
@@ -28,12 +29,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     const chamadoData = chamado[0]; // Pegar o primeiro resultado da array
-    const { name, subtitle, description, createAt } = chamadoData; // Extrair os campos
+    const { name, subtitle, description, createAt, encharged } = chamadoData; // Extrair os campos
 
     // Inserir o chamado na tabela 'Chamado_Concluido'
     await prisma.$executeRaw`
-      INSERT INTO "Chamado_Concluido" (name, subtitle, description, "createAt")
-      VALUES (${name}, ${subtitle}, ${description}, ${createAt});
+      INSERT INTO "Chamado_Concluido" (name, subtitle, description, "createAt", encharged)
+      VALUES (${name}, ${subtitle}, ${description}, ${createAt}, ${encharged});
     `;
 
     // Remover o chamado da tabela original 'Chamado_Caracterizado'

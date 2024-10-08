@@ -43,6 +43,9 @@ const formSchema = z.object({
         const date = new Date(value);
         return !isNaN(date.getTime()); // Verifica se é uma data válida
         }, { message: "Data inválida" }),
+    encharged: z.enum(["T", "G", "M"], {
+        required_error: "Você quem está encarregado do Chamado.",
+    }),
 })
 
 export default function FormContent() {
@@ -95,6 +98,7 @@ useEffect(() => {
             formData.append('longImportance', data.longImportance);
             formData.append('satisfactionClient', data.satisfactionClient);
             formData.append('deadline', data.deadline);
+            formData.append('encharged', data.encharged);
 
             const totalScore = Number(data.execTime) + Number(data.complexity) + Number(data.envolvedAreas) + Number(data.financeReturn) + Number(data.dataStudy) + Number(data.scalability) + Number(data.implatationEquip) + Number(data.longImportance) + Number(data.satisfactionClient);
             formData.append('totalScore', totalScore.toString());
@@ -621,6 +625,47 @@ useEffect(() => {
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
+
+                            <FormField
+                        control={form.control}
+                        name="encharged"
+                        render={({ field }) => (
+                            <FormItem className="w-full">
+                                <FormLabel>Quem será encarregado do Chamado:</FormLabel>
+                                <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="T" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Tainá
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="G" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        Gabriela
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="M" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">Marketing</FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <Button type="submit">Enviar</Button>
                 </form>
                 </Card>

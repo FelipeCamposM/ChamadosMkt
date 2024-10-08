@@ -20,7 +20,7 @@ export default function Success(){
                     <div className="flex flex-col items-center">
                         <span>Parabéns, seu chamado foi criado com sucesso!</span>
                     </div>
-                    <Link href={"/openTicket"} className="flex items-center justify-center mt-8">
+                    <Link href={"/"} className="flex items-center justify-center mt-8">
                         <Button className="bg-blue-800 hover:bg-blue-700">Abrir outro chamado</Button>
                     </Link>
                 </CardContent>

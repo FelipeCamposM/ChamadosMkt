@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
-import { formatDate } from "../_components/categorizedsTickets";
+import { formatDate, whoEncharged } from "../_components/categorizedsTickets";
 import { getSession } from 'next-auth/react';
 
 
@@ -74,6 +74,7 @@ export default function FinishedsTickets() {
               <TableRow>
                 <TableHead className="pl-8">Nome do Solicitante</TableHead>
                 <TableHead>Assunto do Chamado</TableHead>
+                <TableHead>Encarregado:</TableHead>
                 <TableHead>Finalizado por:</TableHead>
                 {/* <TableHead>Criado em:</TableHead> */}
                 <TableHead>Encerrado em:</TableHead>
@@ -89,7 +90,7 @@ export default function FinishedsTickets() {
                           {chamado.name}
                         </TableCell>
                         <TableCell>{chamado.subtitle}</TableCell>
-                        {/* <TableCell>{user ? user.name : 'Carregando'}</TableCell> */}
+                        <TableCell>{whoEncharged(chamado.encharged)}</TableCell>
                         <TableCell>{formatDate(chamado.createAt)}</TableCell>
                         <TableCell>{formatDate(chamado.finishedAt)}</TableCell>
                       </TableRow>

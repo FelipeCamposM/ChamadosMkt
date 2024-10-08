@@ -16,6 +16,7 @@ export async function POST(request: Request , { params }: { params: { id: string
     const body = await request.formData();
     const priority = body.get('totalScore') as string;
     const deadline = body.get('deadline') as string;
+    const encharged = body.get('encharged') as string;
     const id = Number(params.id); // Converter o id para número
 
     // Converte o priority de string para número
@@ -39,8 +40,8 @@ export async function POST(request: Request , { params }: { params: { id: string
 
     // Inserir o chamado na tabela 'chamado_caracterizado' convertendo deadline para timestamp
     await prisma.$executeRaw`
-      INSERT INTO "Chamado_Caracterizado" (name, subtitle, description, deadline, priority)
-      VALUES (${name}, ${subtitle}, ${description}, ${deadlineDate}, ${priority});
+      INSERT INTO "Chamado_Caracterizado" (name, subtitle, description, deadline, priority, encharged)
+      VALUES (${name}, ${subtitle}, ${description}, ${deadlineDate}, ${priority}, ${encharged});
     `;
 
     // Remover o chamado da tabela original 'Chamado'

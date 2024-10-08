@@ -37,6 +37,19 @@ import { useEffect, useState } from "react"
     }
 }
 
+export function whoEncharged(encharged: string) {
+    switch (encharged) {
+        case "T":
+            return "Tainá"
+        case "G":
+            return "Gabriela"
+        case "M":
+            return "Marketing"
+        default:
+            return "Marketing"
+    }
+}
+
 function getPriorityIndex(totalScore: number) {
     if (totalScore <= 9) {
         return "Baixa";
@@ -107,8 +120,11 @@ export function formatDate(date: string | Date): string {
     const day = String(dateObj.getDate()).padStart(2, '0'); // Dia com dois dígitos
     const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Mês com dois dígitos
     const year = dateObj.getFullYear(); // Ano
+    const hours = String(dateObj.getHours()).padStart(2, '0'); // Hora com dois dígitos
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0'); // Minuto com dois dígitos
+
   
-    return `${day}/${month}/${year}`; // Retorna a data formatada como DD/MM/YYYY
+    return `${day}/${month}/${year} - ${hours}:${minutes}`; // Retorna a data formatada como DD/MM/YYYY
   }
   
 
@@ -153,7 +169,8 @@ export default function CategorizedsTickets(){
                             <TableRow>
                             <TableHead className="text-center">Posição</TableHead>
                             <TableHead>Nome do Chamado</TableHead>
-                            <TableHead>Data Limite</TableHead>
+                            <TableHead className="pl-10">Data Limite</TableHead>
+                            <TableHead className="pl-1">Encarregado</TableHead>
                             <TableHead className="text-center">Índice de Prioridade</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -166,8 +183,9 @@ export default function CategorizedsTickets(){
                                         <DialogTrigger className="hover:cursor-pointer" asChild>
                                             <TableRow key={chamado.id}>
                                                 <TableCell className="font-medium text-center">{(chamados.indexOf(chamado) + 1 + "º").toString()}</TableCell>
-                                                <TableCell className="pl-8">{chamado.subtitle}</TableCell>
-                                                <TableCell>{formatDate(chamado.deadline)}</TableCell>
+                                                <TableCell className="pl-4">{chamado.subtitle}</TableCell>
+                                                <TableCell className="pl-4">{formatDate(chamado.deadline)}</TableCell>
+                                                <TableCell className="pl-4">{whoEncharged(chamado.encharged)}</TableCell>
                                                 <TableCell className={`text-center ${getPriorityColor(getPriorityIndex(Number(chamado.priority)))} rounded-lg`}>{getPriorityIndex(Number(chamado.priority))}</TableCell>
                                                 <TableCell className="flex gap-2">
                                                     <Button 
