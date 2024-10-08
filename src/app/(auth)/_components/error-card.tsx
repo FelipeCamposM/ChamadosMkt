@@ -2,6 +2,7 @@
 
 import ErrorCard from '../_components/error-card';
 
+
 export default function RegisterError({
   error,
   reset,
@@ -9,5 +10,5 @@ export default function RegisterError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorCard errorMessage={error.message} reset={reset} />;
+  return <ErrorCard error={error} reset={reset} />;
 }
