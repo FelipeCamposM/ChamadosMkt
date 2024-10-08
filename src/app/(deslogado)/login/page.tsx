@@ -85,9 +85,6 @@ export default function Login() {
                             
                             <div className="flex space-x-4">
                                 <Button type="submit" className="bg-blue-800 hover:bg-blue-700">Entrar</Button>
-                                <Link href={"/register"}>                                
-                                    <Button type="button" className="bg-blue-800 hover:bg-blue-700">Registre-se</Button>
-                                </Link>
                             </div>
                         </form>
                     </Form>
